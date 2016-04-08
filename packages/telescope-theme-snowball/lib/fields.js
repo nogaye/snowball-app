@@ -3,7 +3,7 @@ Categories.removeField(['order', 'slug', 'image', 'parentId']);
 Categories.addField({
   fieldName: 'isPrivate',
   fieldSchema: {
-    label: 'Make this private',
+    label: 'Make this group private',
     defaultValue: 0,
     type: Number,
     autoform: {
@@ -14,6 +14,28 @@ Categories.addField({
           {label: "Private", value: 1}
         ];
       }
+    }
+  }
+});
+Categories.addField({
+  fieldName: 'bulkInvite',
+  label: 'Paste comma-separated emails',
+  fieldSchema: {
+    type: [String],
+    optional: true,
+    autoform: {
+      type: 'tags'
+    }
+  }
+});
+Categories.addField({
+  fieldName: 'bulkInviteCSV',
+  label: 'Mass import via CSV',
+  fieldSchema: {
+    type: String,
+    optional: true,
+    autoform: {
+      type: 'file'
     }
   }
 });
@@ -59,17 +81,17 @@ Users.addField({
 });
 
 SimpleSchema.messages({
-  "required categories": "You must choose an audience (channel) to post your idea."
+  "required categories": "Please choose the group you want to post your idea to."
 });
 Categories.addField({
   fieldName: 'allowedDomains',
   fieldSchema: {
     type: String,
-    label: 'Allowed website domains (one per line):',
+    label: 'Allowed domains',
     optional: true,
     autoform: {
       type: "textarea",
-      placeholder: 'example.com, example.net, etc...'
+      placeholder: ' organization1.com \n organization2.net \n etc... (one domain per line)'
     }
   }
 });
@@ -81,7 +103,23 @@ Categories.addField({
     optional: true,
     autoform: {
       type: "textarea",
-      placeholder: 'name@example.com, name@example.net, etc...'
+      placeholder: ' name@example.com \n name@example.net'
+    }
+  }
+});
+Posts.addField({
+  fieldName: 'notifyUpvotes',
+  fieldSchema: {
+    type: Number,
+    optional: true,
+    editableBy: ["member", "admin"],
+    //todo: why dosn't the label show up?
+    label: 'Notify me after this many upvotes',
+    autoform: {
+      afFieldInput: {
+        type: 'number'
+        //placeholder: 'What do you want to achieve today?',
+      }
     }
   }
 });
@@ -104,11 +142,12 @@ Posts.addField({
     type: [String],
     optional: false,
     editableBy: ["member", "admin"],
-    label: 'Select a Channel',
+    label: 'Select a Group',
     autoform: {
       afFieldInput: {
         type: 'select',
         //multiple: true,
+        firstOption: "Choose an audience",
         options: function () {
           var categories = Categories.find({_id: {$in: Meteor.user().subscribedChannelsIds}}).map(function (category) {
             return {
@@ -143,89 +182,75 @@ Posts.addField({
   fieldSchema: {
     type: String,
     optional: true,
-    //max: 120,
+    max: 120,
     editableBy: ["member", "admin"],
-    //label: 'Idea',
+    label: 'Idea',
     autoform: {
+      rows: 1,
+      autoSize: true,
+      countChars: true,
+      submitOnEnter: true,
       afFieldInput: {
-        type: 'froala',
-        froalaOptions: {
-          charCounterCount: true,
-          charCounterMax: 120,
-          heightMin: 100,
-          placeholderText: 'Explain your idea succinctly',
-          editorClass: 'title-input'
-        },
-        methods: [
-          {
-            method: 'toolbar.hide'
-          },
-          {
-            method: 'fontSize.apply',
-            parameters: ['24']
-          }
-        ]
+        type: 'textareaAdvanced',
+        placeholder: 'What impact would you like to have today?',
       }
     }
   }
 });
 Posts.removeField("body");
-Posts.addField({
-  fieldName: 'body',
-  fieldSchema: {
-    type: String,
-    optional: true,
-    //max: 3000,
-    editableBy: ["member", "admin"],
-    label: 'Rationale',
-    autoform: {
-      afFieldInput: {
-        type: 'froala',
-        froalaOptions: {
-          //charCounterCount: true,
-          heightMin: 250,
-          enter: 'ENTER_P',
-          editorClass: 'body-input',
-          placeholderText: 'Type your idea',
-        },
-        methods: [
-          {
-            method: 'toolbar.hide'
-          }
-        ],
-        events: {
-          initialized: function (e, editor) {
-            editor.html.set('<ul><li><br></li></ul>');
-          },
-          keydown: function (e, editor, keydownEvent) {
-            //console.log('e', e, 'editor', editor, 'keydownEvent', keydownEvent, 'event', event);
-            //backspace
-            if (keydownEvent.keyCode === 8) {
-              //console.log('backspace', keydownEvent.target.innerHTML);
-              if (keydownEvent.target.innerHTML === '<ul><li><br></li></ul>') {
-                keydownEvent.preventDefault();
-                //editor.html.set('<ul><li><br></li></ul>');
-                //$(keydownEvent.target).html('<ul><li><br></li></ul>');
-                //editor.events.focus();
-                console.log('prevented');
-              }
-            } else if (keydownEvent.keyCode === 13) {
-              e.preventDefault();
-              $(e.target).find('p').replaceWith(function () {
-                console.log(this);
-                return '<li>' + $(this).contents() + '</li>';
-              });
-            }
-          }
-        }
+Posts.addField([
+  {
+    fieldName: 'rationale',
+    fieldSchema: {
+      type: Array,
+      optional: true,
+      //max: 3000,
+      editableBy: ["member", "admin"],
+      label: 'Rationale',
+      autoform: {
+        //type: '',
       }
     }
+  },
+  {
+    fieldName: 'rationale.$',
+    fieldSchema: {
+      type: String,
+      //optional: true,
+      editableBy: ["member", "admin"],
+      //autoform: {
+      //  type: "text"
+      //}
+    }
   }
-});
+]);
 
 
 Users.addField({
   fieldName: 'telescope.requestedChannel',
+  fieldSchema: {
+    type: String,
+    optional: true
+  }
+});
+
+Users.addField({
+  fieldName: 'profile.inviteId',
+  fieldSchema: {
+    type: String,
+    optional: true,
+    autoform: {
+      omit: true
+    }
+  }
+});
+AccountsTemplates.addField({
+  _id: 'inviteId',
+  type: 'hidden'
+});
+
+Invites.addField({
+  fieldName: 'groupId',
   fieldSchema: {
     type: String,
     optional: true

@@ -1,0 +1,26 @@
+.afTextareaAdvanced {
+  position: relative;
+  textarea {
+    box-sizing: border-box;
+    max-height: 200px; // optional but recommended
+    min-height: 38px;
+    overflow-x: hidden; // for Firefox (issue #5)
+    resize: none;
+  }
+  textarea:focus {
+    outline: none !important;
+    border-color: #889; //colors to be changed later
+    box-shadow: 5px 2px 5px 2px #889;
+  }
+  .charCount{
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    height: 20px;
+    width: 32px;
+    font-size: 12px;
+    color: #444; 
+    background-color: rgba(255,255,255,.8);
+    text-align: center;
+  }
+}

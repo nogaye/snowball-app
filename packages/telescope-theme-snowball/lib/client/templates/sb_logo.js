@@ -30,37 +30,6 @@ Template.layout.onCreated(function () {
       //reset query
       Session.set('searchQuery', '');
     });
-    if (Meteor.userId()) {
-      console.log('logged in');
-      switch (currentContext.route.path) {
-        case '/channels':
-          Session.set('customTitle', 'Channels');
-          break;
-        case '/notifications':
-          Session.set('customTitle', 'Notifications');
-          break;
-        case '/submit':
-          Session.set('customTitle', 'New Idea');
-          break;
-        case "/users/:_idOrSlug":
-          Session.set('customTitle', 'Profile');
-          break;
-        //case "/verify-email/:paramToken":
-        //  console.log('verifying and subscribing');
-        //  Meteor.call('subscribePrivateOnVerify');
-        //  break;
-        //case "/posts/:_id/:slug?":
-        //  Session.set('customTitle', "Snowball");
-        //  break;
-        case "/channels/add":
-          Session.set('customTitle', "Add Channel");
-          break;
-        default:
-          Session.set('customTitle', null);
-      }
-    } else {
-      Session.set('customTitle', 'Snowball');
-    }
   });
 });
 
@@ -87,7 +56,7 @@ Template.logo.helpers({
     //var route = FlowRouter.current().route.path;
     switch (route) {
       case '/channels':
-        return '<a><i class="fa fa-plus-circle"></i></a>';
+        return '<a><i class="icon icon-plus primary"></i></a>';
         break;
       case '/submit':
         return '<a>Cancel</a>'
@@ -102,16 +71,16 @@ Template.logo.helpers({
     //var route = FlowRouter.current().route.path;
     switch (route) {
       case '/':
-        return '<a><i class="fa fa-search"></i></a>';
+        return '<a><i class="icon icon-magnifier primary"></i></a>';
         break;
       case '/channels':
-        return '<a><i class="fa fa-search"></i></a>';
+        return '<a><i class="icon icon-magnifier primary"></i></a>';
         break;
       case '/submit':
         return '<a>Post</a>';
         break;
       case "/users/:_idOrSlug":
-        return '<a><i class="fa fa-cog"></i></a>';
+        return '<a><i class="icon icon-cog"></i></a>';
         break;
       default:
         return false;
@@ -120,4 +89,3 @@ Template.logo.helpers({
 });
 
 Template.sb_logo.events({});
-
